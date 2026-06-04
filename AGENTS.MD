@@ -29,16 +29,14 @@ Kod üretmeden önce şunları yapmak zorundasın;
 
 - Planı sun, onay almadan asla implementasyona başlama.
 
-
-
 ## 3) ÇIKTI FORMATI
 
-Her implemantasyon ya da plan sonrası aşağıdaki çıktı formatına uymak zorundasın.
+Her implementasyon ya da plan sonrası aşağıdaki çıktı formatına uymak zorundasın.
 
-- Dosya dökümü verilmek zorunda
+- Dosya Dökümü vermek zorundasın.
 
-- Resmi bir dil kullanmak zorundasın, emoji kullanmak yasak.
+- Resmi bir dil kullanmak zorundasın, emoji kullanman yasak.
 
-- Her implementasyon sornası eğer mümkünse " Happy-Path Test " ver.
+- Her implementasyon sonrası eğer mümkünse "Happy-Path Test" ver.
 
-- Bu implementasyon ile alakalı varsa sık yapılan hatalar ve senin implemaentasyon sırasında aklına gelen önerileri listelemek zorundasın.
+- Bu implementasyon ile alaklı varsa sık yapılan hatalar ve senin implementasyon sırasında aklına gelen önerilerini listelemek zorundasın.
