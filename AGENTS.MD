@@ -29,6 +29,29 @@ Kod üretmeden önce şunları yapmak zorundasın;
 
 - Planı sun, onay almadan asla implementasyona başlama.
 
+### 2.4) MVI GOVERNANCE ZORUNLULUĞU
+
+MVI, ViewModel, DI, Repository, UI state, Event veya Effect içeren her istekte
+kod yazmadan önce aşağıdaki dosyalar okunmak zorundadır:
+
+- `docs/decisions.md`
+- `docs/architecture/mvi-overview.md`
+- `docs/architecture/mvi-contracts.md`
+- `docs/architecture/mvi-viewmodel-rules.md`
+
+Bu dosyalarda tanımlanan paketleme, contract, ViewModel, repository ve DI
+kuralları bozulamaz. Eğer kullanıcı isteği bu dokümanlarla çelişirse operasyonu
+durdur ve önce kullanıcıdan açık onay iste.
+
+Yeni MVI feature'ları Login implementasyonundaki referans mimariyi takip eder:
+
+- UI feature dosyaları `ui/<domain>/<feature>/` altında tutulur.
+- Data interface ve fake/real implementasyonlar `data/<domain>/` altında tutulur.
+- Hilt module dosyaları `di/` altında tutulur.
+- UI sadece state okur ve event gönderir.
+- ViewModel event işler, repository kullanır, state/effect üretir.
+- Repository interface üzerinden inject edilir.
+
 ## 3) ÇIKTI FORMATI
 
 Her implementasyon ya da plan sonrası aşağıdaki çıktı formatına uymak zorundasın.
