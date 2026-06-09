@@ -1,4 +1,4 @@
-package com.turkcell.lyraapp.login
+package com.turkcell.lyraapp.ui.auth.login
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -22,21 +24,55 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.turkcell.lyraapp.ui.theme.LyraAppTheme
 
 @Composable
-fun LoginScreen(modifier: Modifier = Modifier) {
+fun LoginScreen(
+    modifier: Modifier = Modifier,
+    viewModel: LoginViewModel = hiltViewModel(),
+    onEffect: (LoginEffect) -> Unit = {},
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(viewModel) {
+        viewModel.effect.collect { effect ->
+            onEffect(effect)
+        }
+    }
+
+    LoginContent(
+        uiState = uiState,
+        onEvent = viewModel::onEvent,
+        modifier = modifier,
+    )
+}
+
+@Composable
+private fun LoginContent(
+    uiState: LoginUiState,
+    onEvent: (LoginEvent) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Surface(
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background,
@@ -80,11 +116,16 @@ fun LoginScreen(modifier: Modifier = Modifier) {
                             fontWeight = FontWeight.Bold,
                         )
                         Spacer(modifier = Modifier.width(14.dp))
-                        Text(
-                            text = "5XX XXX XX XX",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold,
+                        LoginTextInput(
+                            value = uiState.phoneNumber,
+                            onValueChange = { value ->
+                                onEvent(LoginEvent.PhoneChanged(value))
+                            },
+                            placeholder = "5XX XXX XX XX",
+                            keyboardType = KeyboardType.Phone,
+                            textStyle = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                            ),
                         )
                     }
                 },
@@ -94,18 +135,32 @@ fun LoginScreen(modifier: Modifier = Modifier) {
 
             LoginInputFrame(
                 leading = "[]",
-                trailing = "o",
+                trailing = if (uiState.isPasswordVisible) "hide" else "show",
+                onTrailingClick = {
+                    onEvent(LoginEvent.PasswordVisibilityClicked)
+                },
                 content = {
-                    Text(
-                        text = "Sifre",
-                        color = MaterialTheme.colorScheme.onSurface,
-                        style = MaterialTheme.typography.bodyLarge,
+                    LoginTextInput(
+                        value = uiState.password,
+                        onValueChange = { value ->
+                            onEvent(LoginEvent.PasswordChanged(value))
+                        },
+                        placeholder = "Sifre",
+                        keyboardType = KeyboardType.Password,
+                        visualTransformation = if (uiState.isPasswordVisible) {
+                            VisualTransformation.None
+                        } else {
+                            PasswordVisualTransformation()
+                        },
+                        textStyle = MaterialTheme.typography.bodyLarge,
                     )
                 },
             )
 
             TextButton(
-                onClick = {},
+                onClick = {
+                    onEvent(LoginEvent.ForgotPasswordClicked)
+                },
                 modifier = Modifier
                     .align(Alignment.End)
                     .padding(top = 6.dp),
@@ -121,7 +176,9 @@ fun LoginScreen(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Button(
-                onClick = {},
+                onClick = {
+                    onEvent(LoginEvent.LoginClicked)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -151,7 +208,11 @@ fun LoginScreen(modifier: Modifier = Modifier) {
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.bodyMedium,
                 )
-                TextButton(onClick = {}) {
+                TextButton(
+                    onClick = {
+                        onEvent(LoginEvent.RegisterClicked)
+                    },
+                ) {
                     Text(
                         text = "Kayit ol",
                         color = MaterialTheme.colorScheme.primary,
@@ -162,6 +223,40 @@ fun LoginScreen(modifier: Modifier = Modifier) {
             }
         }
     }
+}
+
+@Composable
+private fun LoginTextInput(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    keyboardType: KeyboardType,
+    textStyle: TextStyle,
+    modifier: Modifier = Modifier,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+) {
+    BasicTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier.fillMaxWidth(),
+        textStyle = textStyle.copy(color = MaterialTheme.colorScheme.onSurface),
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+        visualTransformation = visualTransformation,
+        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+        decorationBox = { innerTextField ->
+            Box {
+                if (value.isEmpty()) {
+                    Text(
+                        text = placeholder,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = textStyle,
+                    )
+                }
+                innerTextField()
+            }
+        },
+    )
 }
 
 @Composable
@@ -194,6 +289,7 @@ private fun LoginInputFrame(
     label: String? = null,
     leading: String,
     trailing: String? = null,
+    onTrailingClick: (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
     Box(
@@ -221,7 +317,9 @@ private fun LoginInputFrame(
         }
 
         Row(
-            modifier = Modifier.align(Alignment.CenterStart),
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .padding(end = if (trailing == null) 0.dp else 48.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
@@ -234,13 +332,18 @@ private fun LoginInputFrame(
             content()
         }
 
-        if (trailing != null) {
-            Text(
-                text = trailing,
+        if (trailing != null && onTrailingClick != null) {
+            TextButton(
+                onClick = onTrailingClick,
                 modifier = Modifier.align(Alignment.CenterEnd),
-                color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.titleMedium,
-            )
+            ) {
+                Text(
+                    text = trailing,
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
         }
     }
 }
@@ -279,7 +382,10 @@ private fun EqualizerIcon(
 @Composable
 private fun LoginScreenLightPreview() {
     LyraAppTheme(darkTheme = false) {
-        LoginScreen()
+        LoginContent(
+            uiState = LoginUiState(),
+            onEvent = {},
+        )
     }
 }
 
@@ -287,6 +393,9 @@ private fun LoginScreenLightPreview() {
 @Composable
 private fun LoginScreenDarkPreview() {
     LyraAppTheme(darkTheme = true) {
-        LoginScreen()
+        LoginContent(
+            uiState = LoginUiState(),
+            onEvent = {},
+        )
     }
 }

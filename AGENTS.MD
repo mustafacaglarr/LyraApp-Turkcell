@@ -39,4 +39,6 @@ Her implementasyon ya da plan sonrası aşağıdaki çıktı formatına uymak zo
 
 - Her implementasyon sonrası eğer mümkünse "Happy-Path Test" ver.
 
+- Yazılan kodlar için yazdığın ve oluşturduğun yerlerde neden ve hangi amaçla yazıldığını  ayrıca o kodun hangi işe yaradığını yorum satırlarıyla açıkla.
+
 - Bu implementasyon ile alaklı varsa sık yapılan hatalar ve senin implementasyon sırasında aklına gelen önerilerini listelemek zorundasın.
